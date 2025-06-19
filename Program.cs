@@ -1,8 +1,11 @@
-﻿using System;
+using System;
 using DepartmentNamespace;
 using UsersNamespace;
 using DoctorsNamespace;
+using ShowMenuNamespace;
+using ReservNamespace;
 using System.ComponentModel.DataAnnotations;
+
 
 var pediatricsDoctors = new List<Doctor>
 {
@@ -31,10 +34,13 @@ var departments = new List<Department>
     new Department("Travmotologiya",traumatologyDoctors),
     new Department("Stomologiya",stomotologyDoctors)
 };
+
+//var hours = new List<string> { "09:00-11:00", "12:00-14:00", "15:00-17:00" };
+
 while (true)
 {
     System.Console.WriteLine("Enter your Name: ");
-    string username = Console.ReadLine()!;
+    string name = Console.ReadLine()!;
 
     System.Console.WriteLine("Enter your Surname: ");
     string surname = Console.ReadLine()!;
@@ -44,37 +50,46 @@ while (true)
 
     System.Console.WriteLine("Enter your Phone Number: ");
     string phonenumber = Console.ReadLine()!;
-    
+
+    System.Console.WriteLine();
+
+    var depNames = new List<string>();
+    foreach (var d in departments)
+        depNames.Add(d.DepartmentName!);
+
+    int depIndex = ShowMenuHelper.ShowMenu(depNames, "Choose Department:");
+
+    var selectedDepartment = departments[depIndex];
+    var doctorNames = new List<string>();
+    foreach (var doc in selectedDepartment.Doctors)
+        doctorNames.Add($"{doc.Name} {doc.Surname}");
+
+    int docIndex = ShowMenuHelper.ShowMenu(doctorNames, "Choose Doctor:");
+
+    int hourIndex;
+
+    while (true)
+    {
+        var hours = new List<string>();
+        for (int i = 0; i < selectedDepartment.Doctors[docIndex].Reserved.Count; i++)
+        {
+            hours.Add(selectedDepartment.Doctors[docIndex].Reserved[i].Time);
+        }
+
+        hourIndex = ShowMenuHelper.ShowMenu(hours, "Choose an hour:");
+
+        if (!selectedDepartment.Doctors[docIndex].Reserved[hourIndex].IsReserved)
+        {
+            selectedDepartment.Doctors[docIndex].Reserved[hourIndex].IsReserved = true;
+            break;
+        }
+
+        Console.WriteLine("This hour is full,choose another hour");
+        Console.ReadKey();
+    }
+
+    Console.Clear();
+    Console.WriteLine($"Thanks {name} {surname}!");
+    Console.WriteLine($"{depNames[depIndex]} department Dr.{doctorNames[docIndex]} , {selectedDepartment.Doctors[docIndex].Reserved[hourIndex].Time} reserved.");
+    Console.ReadLine();
 }
-
-/*
-
-Tesevvur edek ele bir program yaziriq ki bu program sayesinde istifadeci istediyi taride istediyi hekimin gebuluna yazila biler
-Esas sertler asagdakilardir.
-
-1. Xestexanin uc sobesi var:
-- Pediatriya
-- Travmatologiya
-- Stamotologiya
-
-2. Her sobede hekim sayi ferqlidir (3,2,4)
-- Hekimin asagdaki parametrleri var
-+ Adi
-+ Soyadi
-+ Is tecrubesi (il olaraq)
-
-3. Her hekimin de gun erzinde 3 gebul saati var:
-+ 09:00-11:00
-+ 12:00-14:00
-+ 15:00-17:00
-Proqrami ise salanda:
-1. User oz melumatlarini daxil edir (Ad, Soyad, Email, Telefon)
-2. 3 sobeden birini secir
-3. Hemen sobede isleyen bir hekimi secir
-4. Hansi saati rezerv elemek isteyirse on secir. (saatlarin yaninda rezerv olunub ve ya olunmayib yazilmalidir). Baslangic olarag butun saatlarin gabaginda rezerv olunmayib yazilir. Rezerv olunmus tarixi secse yazilmalidir hemen vat artig rezerv olunub zehmet olmasa basqa bir vat secin. Yene de secim sansi verir program dayanmir (rekursiya)
-Vati rezerv edenden sonra yazilir ki tesekkurler Eli Eliyev siz sat 12:00 de Hesen hekimin qebuluna yazildiniz. Proqram qayidir en basa. Yeni User yaradib gebula yazilmaq istedikde artiq Hesen hekimin 12:00-14:00 ucun olan tarixinin qabagina rezerv olunub yazilmalidir
-*Bu merheleni bitirenler eger daha da qelizlesdirmek istese. Onda tarixlerle islesinler. Yeni istifadeci birinci tarixi sececek sonra hemen tariden saat sececek.
-
-
-
-*/
